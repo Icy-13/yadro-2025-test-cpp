@@ -9,7 +9,7 @@ void impl::billing_manager::charge_table(int table_id, int duration, int hour_co
         return;
     }
     elapsed_time[table_id] += duration;
-    revenue[table_id] += ((duration + 59) / 60) * hour_cost;
+    revenue[table_id] += ((duration + 59) / 60) * 1LL * hour_cost;
 }
 
 const std::vector<int> &impl::billing_manager::get_times() const {
