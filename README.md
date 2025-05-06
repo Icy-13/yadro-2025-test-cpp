@@ -8,7 +8,7 @@
 
 ```shell
 cmake -S . -B build
-# может понадобитьс€ дописать -G "MinGW Makefiles"
+# может понадобитьс€ дописать -G "MinGW Makefiles" (если используетс€ MinGW)
 
 # дл€ компил€ции приложени€
 cmake --build build -t task
@@ -18,12 +18,14 @@ cmake --build build -t tests
 ```
 
 «апуск приложени€
+
 ```shell
 cd build
 ./task.exe file.txt
 ```
 
 «апуск тестов
+
 ```shell
 cd build/test
 ctest
