@@ -16,6 +16,8 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable(tests ${TEST} ${APP})
+file(COPY ${CMAKE_SOURCE_DIR}/test/inputs DESTINATION ${CMAKE_BINARY_DIR}/test)
+file(COPY ${CMAKE_SOURCE_DIR}/test/outputs DESTINATION ${CMAKE_BINARY_DIR}/test)
 include_directories(../src/app)
 
 target_link_libraries(tests GTest::gtest GTest::gtest_main)
