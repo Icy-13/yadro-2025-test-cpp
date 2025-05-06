@@ -8,12 +8,22 @@
 #include <algorithm>
 #include <functional>
 
+
+namespace impl::errors {
+    const std::string NOT_OPEN = "NotOpenYet";
+    const std::string ALREADY_THERE = "YouShallNotPass";
+    const std::string CLIENT_UNKNOWN = "ClientUnknown";
+    const std::string PLACE_IS_BUSY = "PlaceIsBusy";
+    const std::string FREE_TABLES_WAIT = "ICanWaitNoLonger!";
+}
+
+
 void handle_client_arrival(const impl::event &e, int current_time, impl::context &ctx) {
     if (current_time < ctx.open_time || current_time > ctx.close_time) {
-        ctx.events.emplace_back(e.time, impl::ERROR_ID, "NotOpenYet");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, impl::errors::NOT_OPEN);
     } else {
         if (!ctx.tables.add_client(e.data)) {
-            ctx.events.emplace_back(e.time, impl::ERROR_ID, "YouShallNotPass");
+            ctx.events.emplace_back(e.time, impl::ERROR_ID, impl::errors::ALREADY_THERE);
         }
     }
 }
@@ -26,11 +36,11 @@ int free_table_helper(const impl::event &e, int current_time, impl::context &ctx
 
 void handle_table_acquire(const impl::event &e, int current_time, impl::context &ctx) {
     if (!ctx.tables.client_exists(e.data)) {
-        ctx.events.emplace_back(e.time, impl::ERROR_ID, "ClientUnknown");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, impl::errors::CLIENT_UNKNOWN);
         return;
     }
     if (ctx.tables.table_is_busy(*e.table_id)) {
-        ctx.events.emplace_back(e.time, impl::ERROR_ID, "PlaceIsBusy");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, impl::errors::PLACE_IS_BUSY);
         return;
     }
     free_table_helper(e, current_time, ctx);
@@ -46,11 +56,11 @@ void queue_pop_helper(const impl::event &e, int current_time, impl::context &ctx
 
 void handle_client_waits(const impl::event &e, int current_time, impl::context &ctx) {
     if (!ctx.tables.client_exists(e.data)) {
-        ctx.events.emplace_back(e.time, impl::ERROR_ID, "ClientUnknown");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, impl::errors::CLIENT_UNKNOWN);
         return;
     }
     if (ctx.tables.get_free_tables() > 0) {
-        ctx.events.emplace_back(e.time, impl::ERROR_ID, "ICanWaitNoLonger!");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, impl::errors::FREE_TABLES_WAIT);
         return;
     }
     if (ctx.tables.get_queue_size() >= ctx.tables_count) {
@@ -65,7 +75,7 @@ void handle_client_waits(const impl::event &e, int current_time, impl::context &
 
 void handle_client_departure(const impl::event &e, int current_time, impl::context &ctx) {
     if (!ctx.tables.client_exists(e.data)) {
-        ctx.events.emplace_back(e.time, impl::ERROR_ID, "ClientUnknown");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, impl::errors::CLIENT_UNKNOWN);
         return;
     }
     int table_id = free_table_helper(e, current_time, ctx);
