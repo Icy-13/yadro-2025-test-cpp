@@ -45,12 +45,17 @@ void queue_pop_helper(const impl::event &e, int current_time, impl::context &ctx
 }
 
 void handle_client_waits(const impl::event &e, int current_time, impl::context &ctx) {
+    if (!ctx.tables.client_exists(e.data)) {
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, "ClientUnknown");
+        return;
+    }
     if (ctx.tables.get_free_tables() > 0) {
         ctx.events.emplace_back(e.time, impl::ERROR_ID, "ICanWaitNoLonger!");
         return;
     }
     if (ctx.tables.get_queue_size() >= ctx.tables_count) {
         ctx.events.emplace_back(e.time, impl::LEAVE_ID, e.data);
+        ctx.tables.remove_client(e.data);
         return;
     }
     int table_id = free_table_helper(e, current_time, ctx);

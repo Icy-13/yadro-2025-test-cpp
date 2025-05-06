@@ -12,7 +12,7 @@ std::pair<int, int> impl::table_manager::free_table(const std::string &client_na
     int duration = current_time - active_tables[table_id];
     active_tables[table_id] = -1;
     free_tables_count++;
-    clients_to_table.erase(client_name);
+    remove_client(client_name);
     return {table_id, duration};
 }
 
@@ -27,6 +27,11 @@ void impl::table_manager::acquire_table(int current_time, int table_id, const st
 bool impl::table_manager::add_client(const std::string &client_name) {
     return clients_to_table.insert({client_name, -1}).second;
 }
+
+bool impl::table_manager::remove_client(const std::string &client_name) {
+    return clients_to_table.erase(client_name);
+}
+
 
 bool impl::table_manager::client_exists(const std::string &client) const {
     return clients_to_table.count(client) != 0;

@@ -25,6 +25,8 @@ namespace impl {
 
         bool add_client(const std::string &client_name);
 
+        bool remove_client(const std::string &client_name);
+
         bool client_exists(const std::string &client) const;
 
         bool table_is_busy(int table_id) const;
