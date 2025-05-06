@@ -10,10 +10,10 @@
 
 void handle_client_arrival(const impl::event &e, int current_time, impl::context &ctx) {
     if (current_time < ctx.open_time || current_time > ctx.close_time) {
-        ctx.events.emplace_back(e.time, ERROR_ID, "NotOpenYet");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, "NotOpenYet");
     } else {
         if (!ctx.tables.add_client(e.data)) {
-            ctx.events.emplace_back(e.time, ERROR_ID, "YouShallNotPass");
+            ctx.events.emplace_back(e.time, impl::ERROR_ID, "YouShallNotPass");
         }
     }
 }
@@ -26,11 +26,11 @@ int free_table_helper(const impl::event &e, int current_time, impl::context &ctx
 
 void handle_table_acquire(const impl::event &e, int current_time, impl::context &ctx) {
     if (!ctx.tables.client_exists(e.data)) {
-        ctx.events.emplace_back(e.time, ERROR_ID, "ClientUnknown");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, "ClientUnknown");
         return;
     }
     if (ctx.tables.table_is_busy(*e.table_id)) {
-        ctx.events.emplace_back(e.time, ERROR_ID, "PlaceIsBusy");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, "PlaceIsBusy");
         return;
     }
     free_table_helper(e, current_time, ctx);
@@ -40,17 +40,17 @@ void handle_table_acquire(const impl::event &e, int current_time, impl::context 
 void queue_pop_helper(const impl::event &e, int current_time, impl::context &ctx, int table_id) {
     auto [next_client, success] = ctx.tables.queue_pop(current_time, table_id);
     if (success) {
-        ctx.events.emplace_back(e.time, ACQUIRE_ID, next_client, table_id);
+        ctx.events.emplace_back(e.time, impl::ACQUIRE_ID, next_client, table_id);
     }
 }
 
 void handle_client_waits(const impl::event &e, int current_time, impl::context &ctx) {
     if (ctx.tables.get_free_tables() > 0) {
-        ctx.events.emplace_back(e.time, ERROR_ID, "ICanWaitNoLonger!");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, "ICanWaitNoLonger!");
         return;
     }
     if (ctx.tables.get_queue_size() >= ctx.tables_count) {
-        ctx.events.emplace_back(e.time, LEAVE_ID, e.data);
+        ctx.events.emplace_back(e.time, impl::LEAVE_ID, e.data);
         return;
     }
     int table_id = free_table_helper(e, current_time, ctx);
@@ -60,7 +60,7 @@ void handle_client_waits(const impl::event &e, int current_time, impl::context &
 
 void handle_client_departure(const impl::event &e, int current_time, impl::context &ctx) {
     if (!ctx.tables.client_exists(e.data)) {
-        ctx.events.emplace_back(e.time, ERROR_ID, "ClientUnknown");
+        ctx.events.emplace_back(e.time, impl::ERROR_ID, "ClientUnknown");
         return;
     }
     int table_id = free_table_helper(e, current_time, ctx);
@@ -101,7 +101,7 @@ void finalize_day(impl::context &ctx, const std::string &close_time_string) {
     for (const auto &client_name: remaining_clients) {
         auto [table_id, duration] = ctx.tables.free_table(client_name, ctx.close_time);
         ctx.billing.charge_table(table_id, duration, ctx.hour_cost);
-        ctx.events.emplace_back(close_time_string, LEAVE_ID, client_name);
+        ctx.events.emplace_back(close_time_string, impl::LEAVE_ID, client_name);
     }
 }
 

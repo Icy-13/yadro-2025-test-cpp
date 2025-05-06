@@ -9,11 +9,11 @@
 #include "table_manager.h"
 #include "billing_manager.h"
 
-const int LEAVE_ID = 11;
-const int ACQUIRE_ID = 12;
-const int ERROR_ID = 13;
-
 namespace impl {
+    const int LEAVE_ID = 11;
+    const int ACQUIRE_ID = 12;
+    const int ERROR_ID = 13;
+
     struct context {
         std::vector<impl::event> &events;
         impl::table_manager &tables;
