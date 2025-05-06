@@ -58,6 +58,9 @@ std::pair<std::string, bool> impl::table_manager::queue_pop(int current_time, in
     if (clients_queue.empty() || table_id == -1) {
         return {"", false};
     }
+    if (table_is_busy(table_id)) {
+        return {"", false};
+    }
     std::string next_client = clients_queue.front();
     clients_queue.pop();
     acquire_table(current_time, table_id, next_client);
